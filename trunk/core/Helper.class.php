@@ -56,7 +56,7 @@ abstract class Helper {
 			}
 			
 			if(!file_exists($file)){
-				$file = BASE_PATH .'/'. $c .'/'. $controller .'.php';
+				$file = APP_PATH .'/controller/'. $c .'/'. $controller .'.php';
 				define('NOGROUP', 1);
 			}
 		}
@@ -105,7 +105,7 @@ abstract class Helper {
 			return self::$obj[$hash];
 		}
 
-		$file = TRUNK_PATH .'/componment/'. $group . $componment .'.php';
+		$file = APP_PATH .'/componment/'. $group . $componment .'.php';
 		
 		if(file_exists($file)){//文件存在，加载
 			require_once $file;
@@ -180,36 +180,6 @@ abstract class Helper {
 		}
 	}
 
-
-	/**
-	 * Load store file
-	 */
-	public static function loadStore($store){
-		$storeClass = 'S_'.ucfirst($store);
-
-		if(self::$obj[$storeClass] && is_object(self::$obj[$storeClass])) {
-			return self::$obj[$storeClass];
-		}
-
-		$file = STORE_PATH .'/'. $storeClass .'.php';
-		if(file_exists($file)) {
-			require_once $file;
-		}else{
-			$traceInfo = debug_backtrace();
-			$error = 'Store '.$storeClass.' NOT FOUND !';
-			Helper::raiseError($traceInfo, $error);
-		}
-
-		try{
-			self::$obj[$storeClass] = new $storeClass;
-			return self::$obj[$storeClass];
-		}catch(Exception $error) {
-			$traceInfo = debug_backtrace();
-			$error = 'Load store '.$storeClass.' FAILED !';
-			Helper::raiseError($traceInfo, $error);
-		}
-	}
-
 	
 	/**
 	 * Load model
@@ -226,30 +196,30 @@ abstract class Helper {
 			list($category, $model) = explode('/', $model);
 			$path = '/'. $category;
 		}
-		$model = 'M_'.ucfirst($model);
-		$hash = md5($path . $model);
+		$modelClass = 'M_'.ucfirst($model);
+		$hash = md5($path . $modelClass);
 
 		if(self::$obj[$hash] && is_object(self::$obj[$hash])) {
 			return self::$obj[$hash];
 		}
 
-		$file = MODEL_PATH .$path .'/'.$model.'.php';
+		$file = MODEL_PATH .$path .'/'.$modelClass.'.php';
 		if(file_exists($file)) {
 			require_once $file;
-		}else{
-			$traceInfo = debug_backtrace();
-			$error = 'Model '.$model.' NOT FOUND !';
-			Helper::raiseError($traceInfo, $error);
-		}
 
-		try{
-			self::$obj[$hash] = new $model;
-			return self::$obj[$hash];
-		}catch(Exception $error) {
-			$traceInfo = debug_backtrace();
-			$error = 'Load model '.$model.' FAILED !';
-			Helper::raiseError($traceInfo, $error);
+			try{
+				$modelObj = new $modelClass;
+			}catch(Exception $error) {
+				$traceInfo = debug_backtrace();
+				$error = 'Load model '.$modelClass.' FAILED !';
+				Helper::raiseError($traceInfo, $error);
+			}
+		} else {
+			$modelObj = new M_Model($model);
 		}
+		
+		self::$obj[$hash] =$modelObj;
+		return $modelObj;
 	}
 
 

@@ -10,7 +10,7 @@
  * ---------------- DO NOT MODIFY THIS FILE UNLESS YOU FULLY UNDERSTAND ! -------------
  */
 
-abstract class M_Model {
+class M_Model {
 
 	//change By 小皓。数据仓库所需字段
 	public $data = array();				//查询到的数据存储数组

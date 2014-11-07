@@ -19,38 +19,31 @@ abstract class Orange {
 	 * <br />Remark: This framework support PDO and MySQLi extension, either is OK !
 			If none of them is enabled, raiseError and application halt !
 	 */
-	private static function init($configFile) {
+	private static function init() {
 		/**
 		 * Check PHP_VERSION
 		 */
 		if(PHP_VERSION < '5.2'){
 			die('<h2>PHP Version must be greater or equal then 5.2!</h2>');
 		}
-		// 注册AUTOLOAD方法
-//		spl_autoload_register('Orange::autoload');
-		
-		if(file_exists($configFile)){
-			require $configFile;
-		}else{
-			die('<h2>Config file NOT found !</h2>');
-		}
-		
+
+		define('NL', "\r\n");
+
+		// Basic controller and Helper:
+		require CORE_PATH.'/C_Control.php';
+		require CORE_PATH.'/Helper.class.php';
 		require CORE_PATH.'/M_Model.class.php';
 		require TRUNK_PATH.'/interface/database.interface.php';
 		require TRUNK_PATH.'/driver/db/DB_'. DB_DRIVER .'.class.php';
 		require CORE_PATH.'/DB.class.php';
+
+		// Import Basic and Network function
+		Helper::import('Basic');
+		Helper::import('Network');
 		
 		DB::init();
-		
-		/**
-		 * PDO extension is required
-		 */
-//		if(class_exists('pdo')){
-//			require CORE_PATH.'/M_Model.pdo.php';
-//		}else{
-//			$error = '<h3>This framework requires PDO support !</h3>';
-//			Helper::raiseError(debug_backtrace(), $error);
-//		}
+		// 注册AUTOLOAD方法
+		spl_autoload_register('Orange::autoload');
 	}
 
 
@@ -61,7 +54,7 @@ abstract class Orange {
 	 * @return null
 	 */
 	public static function run($configFile = '') {
-		self::init($configFile);
+		self::init();
 		
 		Helper::import('Rounder');
 		$rounderObj = new L_Rounder();
@@ -110,7 +103,7 @@ abstract class Orange {
 		$JS_PATH = '/view/js';
 		$IMG_PATH = '/view/images';
 		$CSS_PATH = '/view/css';
-		$CTRL_PATH = BASE_PATH;
+		$CTRL_PATH = BASE_PATH .'/application/controller';
 		if($urlInfo['path'] === '/' || $urlInfo['path'] === '/index.php'){
 			$controller = $action = 'index';
 			if(defined('SITE_GROUP')){
@@ -315,6 +308,14 @@ abstract class Orange {
 	 * @return void
 	 */
 	static function autoload($class){
+		if(strpos($class, 'L_') === 0){
+			$classFile = LIB_PATH .'/'. $class .'.class.php';
+		} elseif(strpos($class, 'C_')) {
+			$classFile = CTRL_PATH .'/'. $class .'.php';
+		}
 		
+		if(file_exists($classFile)){
+			require $classFile;
+		}
 	}
 }

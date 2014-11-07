@@ -4,9 +4,7 @@
 <head>
 <title>Smarty Debug Console</title>
 <style type="text/css">
-{
-literal
-}
+<{literal}>
 body,h1,h2,td,th,p {
 	font-family: sans-serif;
 	font-weight: normal;
@@ -83,9 +81,7 @@ td {
 #table_config_vars th {
 	color: maroon;
 }
-{/
-literal
-}
+<{/literal}>
 </style>
 </head>
 <body>
